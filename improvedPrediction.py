@@ -1,0 +1,47 @@
+from riotwatcher import LolWatcher, ApiError
+
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from tensorflow import keras
+
+
+lol_watcher = LolWatcher('RGAPI-1c342b1d-1c64-4075-b237-1f5c54023e4e')
+my_region = 'na1'
+
+#declare versions
+versions = lol_watcher.data_dragon.versions_for_region(my_region)
+champions_version = versions['n']['champion']
+summoner_spells_version=versions['n']['summoner']
+items_version=versions['n']['item']
+champions = lol_watcher.data_dragon.champions(champions_version)['data']
+
+learnData = pd.read_excel('dataFolder/learnData.xlsx')
+testData = pd.read_excel('dataFolder/testData.xlsx')
+learnResult = learnData.pop('win')
+testResult = testData.pop('win')
+learnData = learnData.to_numpy()
+testData = testData.to_numpy()
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(17),
+    keras.layers.Dense(128, activation='relu'),
+    keras.layers.Dense(128, activation='relu'),
+    keras.layers.Dense(64, activation='relu'),
+    keras.layers.Dense(2, activation='softmax')
+])
+
+model.compile(optimizer='adam',
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
+model.fit(learnData, learnResult, epochs=5)
+test = model.evaluate(testData,  testResult, verbose=1) 
+model.save('models/model1')
+
+print(model.summary())
+print('Test accuracy:', test)
+x = model.predict(testData)
+print(x[0:10])
