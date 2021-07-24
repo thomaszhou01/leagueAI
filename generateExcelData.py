@@ -5,7 +5,7 @@ import matplotlib as plt
 import pandas as pd
 
 #uses tensorflow 1.0 style coding not good 
-lol_watcher = LolWatcher('RGAPI-de3be499-5109-4705-951e-aeea38864715')
+lol_watcher = LolWatcher('RGAPI-1c342b1d-1c64-4075-b237-1f5c54023e4e')
 my_region = 'na1'
 
 #declare versions
@@ -48,6 +48,7 @@ def generateGames(summonerName, gamesX100):
     redDrakeKills = []
     blueTotalGold = []
     redTotalGold = []
+    gameLength = []
     matchIDs = generateMatchIds(summonerName, gamesX100)
     print(len(matchIDs))
     
@@ -68,6 +69,7 @@ def generateGames(summonerName, gamesX100):
         redInhibsKills.append(matchDetail['teams'][1]['inhibitorKills'])
         redBaronKills.append(matchDetail['teams'][1]['baronKills'])
         redDrakeKills.append(matchDetail['teams'][1]['dragonKills'])
+        gameLength.append(matchDetail['gameDuration'])
         blueGold = 0
         redGold = 0
 
@@ -98,10 +100,11 @@ def generateGames(summonerName, gamesX100):
         'redBaronKills': redBaronKills,
         'redDrakeKills': redDrakeKills,
         'blueTotalGold' : blueTotalGold,
-        'redTotalGold': redTotalGold
+        'redTotalGold': redTotalGold,
+        'gameLength': gameLength
     }
     return gameData
 
-learnData = generateGames('Tactical', 10)
+learnData = generateGames('Tactical', 1)
 gameDataPandas = pd.DataFrame(data=learnData)
-gameDataPandas.to_excel('learnData.xlsx')
+print(gameDataPandas)

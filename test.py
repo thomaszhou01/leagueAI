@@ -11,7 +11,7 @@ import ssl
 from tensorflow.python.ops.numpy_ops.np_math_ops import true_divide
 
 #uses tensorflow 1.0 style coding not good 
-lol_watcher = LolWatcher('RGAPI-1c342b1d-1c64-4075-b237-1f5c54023e4e')
+lol_watcher = LolWatcher('')
 my_region = 'na1'
 
 #declare versions
