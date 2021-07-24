@@ -37,12 +37,9 @@ model = tf.keras.Sequential([
     keras.layers.Dense(2, activation='softmax')
 ])
 
-model.compile(optimizer='adam',
-              loss='sparse_categorical_crossentropy',
-              metrics=['accuracy'])
-model.fit(learnData, learnResult, epochs=75)
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+model.fit(learnData, learnResult, epochs=100)
 test = model.evaluate(testData,  testResult, verbose=1) 
-model.save('models/model1')
 
 print(model.summary())
 print('Test accuracy:', test)
