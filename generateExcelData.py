@@ -5,7 +5,7 @@ import matplotlib as plt
 import pandas as pd
 
 #uses tensorflow 1.0 style coding not good 
-lol_watcher = LolWatcher('RGAPI-1c342b1d-1c64-4075-b237-1f5c54023e4e')
+lol_watcher = LolWatcher('')
 my_region = 'na1'
 
 #declare versions
@@ -107,4 +107,4 @@ def generateGames(summonerName, gamesX100):
 
 learnData = generateGames('Tactical', 1)
 gameDataPandas = pd.DataFrame(data=learnData)
-print(gameDataPandas)
+print(learnData)
