@@ -105,6 +105,7 @@ def generateGames(summonerName, gamesX100):
     }
     return gameData
 
-learnData = generateGames('Tactical', 1)
+learnData = generateGames('frabedajeje', 1)
 gameDataPandas = pd.DataFrame(data=learnData)
-print(learnData)
+gameDataPandas.set_index('win', inplace=True)
+gameDataPandas.to_excel('dataFolder/testData.xlsx')

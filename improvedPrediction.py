@@ -27,17 +27,20 @@ learnData = learnData.to_numpy()
 testData = testData.to_numpy()
 
 model = tf.keras.Sequential([
-    tf.keras.layers.Dense(17),
+    tf.keras.layers.Dense(18),
     keras.layers.Dense(128, activation='relu'),
     keras.layers.Dense(128, activation='relu'),
-    keras.layers.Dense(64, activation='relu'),
+    keras.layers.Dense(128, activation='relu'),
+    keras.layers.Dense(128, activation='relu'),
+    keras.layers.Dense(128, activation='relu'),
+    keras.layers.Dense(128, activation='relu'),
     keras.layers.Dense(2, activation='softmax')
 ])
 
 model.compile(optimizer='adam',
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
-model.fit(learnData, learnResult, epochs=5)
+model.fit(learnData, learnResult, epochs=75)
 test = model.evaluate(testData,  testResult, verbose=1) 
 model.save('models/model1')
 
