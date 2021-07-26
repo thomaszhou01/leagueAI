@@ -4,9 +4,7 @@ from riotwatcher import LolWatcher, ApiError
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import time
 import requests
-import ssl
 
 from tensorflow.python.ops.numpy_ops.np_math_ops import true_divide
 

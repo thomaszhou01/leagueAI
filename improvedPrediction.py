@@ -19,7 +19,7 @@ summoner_spells_version=versions['n']['summoner']
 items_version=versions['n']['item']
 champions = lol_watcher.data_dragon.champions(champions_version)['data']
 
-learnData = pd.read_excel('dataFolder/learnData.xlsx')
+learnData = pd.concat(pd.read_excel('dataFolder/learnData.xlsx', sheet_name=None), ignore_index=True)
 testData = pd.read_excel('dataFolder/testData.xlsx')
 learnResult = learnData.pop('win')
 testResult = testData.pop('win')
@@ -31,15 +31,13 @@ model = tf.keras.Sequential([
     keras.layers.Dense(128, activation='relu'),
     keras.layers.Dense(128, activation='relu'),
     keras.layers.Dense(128, activation='relu'),
-    keras.layers.Dense(128, activation='relu'),
-    keras.layers.Dense(128, activation='relu'),
-    keras.layers.Dense(128, activation='relu'),
     keras.layers.Dense(2, activation='softmax')
 ])
 
 model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 model.fit(learnData, learnResult, epochs=100)
 test = model.evaluate(testData,  testResult, verbose=1) 
+model.save('models/model1')
 
 print(model.summary())
 print('Test accuracy:', test)
