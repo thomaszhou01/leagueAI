@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib as plt
 import pandas as pd
 
-lol_watcher = LolWatcher('RGAPI-9b445774-93e0-47ac-b668-c275e9545474')
+lol_watcher = LolWatcher('')
 my_region = 'euw1'
 
 #declare versions
