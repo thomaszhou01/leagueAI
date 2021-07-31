@@ -6,6 +6,7 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
 from tensorflow import keras
 
 
@@ -23,11 +24,12 @@ learnData = pd.concat(pd.read_excel('dataFolder/learnData.xlsx', sheet_name=None
 testData = pd.read_excel('dataFolder/testData.xlsx')
 learnResult = learnData.pop('win')
 testResult = testData.pop('win')
-learnData = learnData.to_numpy()
-testData = testData.to_numpy()
+
+
+sns.pairplot(learnData[['goldDiff', 'killDif', 'blueTowerKills', 'redTowerKills']], diag_kind='kde')
 
 model = tf.keras.Sequential([
-    tf.keras.layers.Dense(18),
+    keras.layers.Dense(16),
     keras.layers.Dense(128, activation='relu'),
     keras.layers.Dense(128, activation='relu'),
     keras.layers.Dense(128, activation='relu'),
@@ -35,7 +37,7 @@ model = tf.keras.Sequential([
 ])
 
 model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-model.fit(learnData, learnResult, epochs=100)
+model.fit(learnData, learnResult, epochs=20)
 test = model.evaluate(testData,  testResult, verbose=1) 
 model.save('models/model1')
 

@@ -32,7 +32,7 @@ def getGamePlayers(summonerName, gameNum):
     print("Match Result: " + matchDetail['teams'][0]['win'])
 
 def doSmartTensorflowThings(learningPlayer, testPlayer):
-    learnData = pd.read_excel('dataFolder/learnData.xlsx')
+    learnData = pd.concat(pd.read_excel('dataFolder/learnData.xlsx', sheet_name=None), ignore_index=True)
     testData = pd.read_excel('dataFolder/testData.xlsx')
     learnResult = learnData.pop('win')
     testResult = testData.pop('win')
@@ -42,7 +42,7 @@ def doSmartTensorflowThings(learningPlayer, testPlayer):
     testDataPandas = pd.DataFrame(data=testData)
 
     NUMERIC_COLUMNS = ['firstBlood', 'firstTower', 'firstInhibitor', 'firstBaron', 'firstDragon', 'firstHerald', 'blueTowerKills', 'blueInhibKills', 'blueBaronKills', 'blueDrakeKills',
-    'redTowerKills', 'redInhibKills', 'redBaronKills', 'redDrakeKills', 'blueTotalGold', 'redTotalGold']
+    'redTowerKills', 'redInhibKills', 'redBaronKills', 'redDrakeKills', 'goldDiff', 'killDif']
 
     feature_columns = []
     for feature_name in NUMERIC_COLUMNS:

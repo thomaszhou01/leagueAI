@@ -5,7 +5,7 @@ import matplotlib as plt
 import pandas as pd
 
 lol_watcher = LolWatcher('')
-my_region = 'euw1'
+my_region = 'na1'
 
 #declare versions
 versions = lol_watcher.data_dragon.versions_for_region(my_region)
@@ -29,7 +29,6 @@ def generateMatchIds(name, num):
 
 #gather data
 def generateGames(summonerName, gamesX100):
-    
     gameOutcome = []
     firstBlood = []
     firstTower = []
@@ -74,10 +73,10 @@ def generateGames(summonerName, gamesX100):
         redKills = 0
         for player in matchDetail['participants']:
             if player['teamId'] == 100:
-                blueGold += player['stats']['goldSpent']
+                blueGold += player['stats']['goldEarned']
                 blueKills += player['stats']['kills']
             else:
-                redGold += player['stats']['goldSpent']
+                redGold += player['stats']['goldEarned']
                 redKills += player['stats']['kills']
 
         goldDifference.append(blueGold-redGold)
@@ -106,9 +105,9 @@ def generateGames(summonerName, gamesX100):
     }
     return gameData
 
-learnData = generateGames('MSF Sertuss', 10)
+learnData = generateGames('tomtom2352', 1)
 gameDataPandas = pd.DataFrame(data=learnData)
 gameDataPandas.set_index('win', inplace=True)
 
 with pd.ExcelWriter('dataFolder/learnData.xlsx', mode='a') as writer:  
-    gameDataPandas.to_excel(writer, sheet_name='Sheet2')
+    gameDataPandas.to_excel(writer, sheet_name='Sheet5')
