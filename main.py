@@ -1,11 +1,9 @@
-from logging import exception
-from tkinter.constants import DISABLED, END, GROOVE, LEFT, NSEW, RIGHT
+from tkinter.constants import ACTIVE, DISABLED, END, GROOVE, LEFT, NSEW, RIGHT
 from riotwatcher import LolWatcher, ApiError
 from PIL import Image, ImageTk
-import tkinter as tk
-import tensorflow as tf
-import time
 from tensorflow import keras
+import tkinter as tk
+import time
 import requests
 import threading
 
@@ -26,7 +24,7 @@ class Application:
         self.blueTeamChamps = []
         self.redTeamChamps = []
         self.killAllThreads = False
-        self.model = tf.keras.models.load_model('models/model1')
+        self.model = keras.models.load_model('models/model1')
         self.setup()
     
     def setup(self):
@@ -37,14 +35,14 @@ class Application:
         self.apiEntry = tk.Entry(self.master)
         self.apiEntry.place(x=300,y=50,width=300,height=20)
 
-        self.greet_button = tk.Button(self.master, text="Enter API Key", command=self.startThread)
-        self.greet_button.place(x=200,y=50,width=80,height=20)
+        self.apiStart = tk.Button(self.master, text="Enter API Key", command=self.startThread)
+        self.apiStart.place(x=200,y=50,width=80,height=20)
 
         self.close_button = tk.Button(self.master, text="Close", command=self.onClose)
         self.close_button.place(x=350,y=550,width=100,height=40)
 
-        self.close_button = tk.Button(self.master, text="Threads", command=self.checkThreads)
-        self.close_button.place(x=150,y=550,width=100,height=40)
+        #self.threadsButton = tk.Button(self.master, text="Threads", command=self.checkThreads)
+        #self.threadsButton.place(x=150,y=550,width=100,height=40)
 
 
 
@@ -53,8 +51,8 @@ class Application:
             print(thread.name)
     
     def startThread(self):
-        x = threading.Thread(target=self.getAPIKey)
-        x.start()
+        self.secondThread = threading.Thread(target=self.getAPIKey)
+        self.secondThread.start()
 
     #create the names of players and their champion icons
     def createNamesAndIcons(self):
@@ -72,7 +70,63 @@ class Application:
 
         self.redConfidence = tk.Label(self.master, text="Red Confidence: ", font=("Ariel", 18))
         self.redConfidence.configure(background='#80b3ff')
-        self.redConfidence.place(x=530,y=500)
+        self.redConfidence.place(x=600,y=500)
+
+        self.blueTag = tk.Label(self.master, text="Blue Stats", font=("Ariel", 16))
+        self.blueTag.configure(background='#80b3ff')
+        self.blueTag.place(x=10,y=100)
+
+        self.redTag = tk.Label(self.master, text="Red Stats", font=("Ariel", 16))
+        self.redTag.configure(background='#80b3ff')
+        self.redTag.place(x=680,y=100)
+
+        self.blueKills = tk.Label(self.master, text="Kills: ", font=("Ariel", 12))
+        self.blueKills.configure(background='#80b3ff')
+        self.blueKills.place(x=10,y=150)
+
+        self.redKills = tk.Label(self.master, text="Kills: ", font=("Ariel", 12))
+        self.redKills.configure(background='#80b3ff')
+        self.redKills.place(x=680,y=150)
+
+        self.blueTowers = tk.Label(self.master, text="Towers: ", font=("Ariel", 12))
+        self.blueTowers.configure(background='#80b3ff')
+        self.blueTowers.place(x=10,y=200)
+
+        self.redTowers = tk.Label(self.master, text="Towers : ", font=("Ariel", 12))
+        self.redTowers.configure(background='#80b3ff')
+        self.redTowers.place(x=680,y=200)
+
+        self.blueInhibs = tk.Label(self.master, text="Inhibs: ", font=("Ariel", 12))
+        self.blueInhibs.configure(background='#80b3ff')
+        self.blueInhibs.place(x=10,y=250)
+
+        self.redInhibs = tk.Label(self.master, text="Inhibs: ", font=("Ariel", 12))
+        self.redInhibs.configure(background='#80b3ff')
+        self.redInhibs.place(x=680,y=250)
+
+        self.blueDragons = tk.Label(self.master, text="Dragons: ", font=("Ariel", 12))
+        self.blueDragons.configure(background='#80b3ff')
+        self.blueDragons.place(x=10,y=300)
+
+        self.redDragons = tk.Label(self.master, text="Dragons: ", font=("Ariel", 12))
+        self.redDragons.configure(background='#80b3ff')
+        self.redDragons.place(x=680,y=300)
+
+        self.blueBarons = tk.Label(self.master, text="Barons: ", font=("Ariel", 12))
+        self.blueBarons.configure(background='#80b3ff')
+        self.blueBarons.place(x=10,y=350)
+
+        self.redBarons = tk.Label(self.master, text="Barons: ", font=("Ariel", 12))
+        self.redBarons.configure(background='#80b3ff')
+        self.redBarons.place(x=680,y=350)
+
+        self.blueItems = tk.Label(self.master, text="Item Gold: ", font=("Ariel", 12))
+        self.blueItems.configure(background='#80b3ff')
+        self.blueItems.place(x=10,y=400)
+
+        self.redItems = tk.Label(self.master, text="Item Gold: ", font=("Ariel", 12))
+        self.redItems.configure(background='#80b3ff')
+        self.redItems.place(x=680,y=400)
 
         #create labels and icons
         for i in range(len(self.blueTeam)):
@@ -110,6 +164,22 @@ class Application:
         self.redTeam.clear()
         self.blueTeamChamps.clear()
         self.redTeamChamps.clear()
+        self.blueTag.destroy()
+        self.redTag.destroy()
+        self.blueKills.destroy()
+        self.redKills.destroy()
+        self.blueTowers.destroy()
+        self.redTowers.destroy()
+        self.blueInhibs.destroy()
+        self.redInhibs.destroy()
+        self.blueDragons.destroy()
+        self.redDragons.destroy()
+        self.blueBarons.destroy()
+        self.redBarons.destroy()
+        self.blueItems.destroy()
+        self.redItems.destroy()
+        self.apiStart.configure(state=ACTIVE)
+
         print('resetting')
 
     
@@ -129,13 +199,13 @@ class Application:
         try:
             lol_watcher = LolWatcher(x1)
             my_region = 'na1'
-
             versions = lol_watcher.data_dragon.versions_for_region(my_region)
             champions_version = versions['n']['champion']
             items_version=versions['n']['item']
             self.champions = lol_watcher.data_dragon.champions(champions_version)['data']
             self.items = lol_watcher.data_dragon.items(items_version)['data']
             self.me = lol_watcher.summoner.by_name(my_region, 'tomtom2352')
+            self.apiStart.configure(state=DISABLED)
             self.waitForActiveGame()
         except Exception as e:
             print(e)
@@ -170,6 +240,7 @@ class Application:
             totalGold += self.items[itemID]['gold']['total']
         return totalGold
     
+
     def analyzeGame(self):
         listSize = 0
         data = [0]*16
@@ -204,21 +275,21 @@ class Application:
                             elif event['Recipient'] in self.redTeam:
                                 data[0] = 2
                         elif event['EventName'] == "FirstBrick":
-                            if event['KillerName'] in self.blueTeam:
+                            if event['KillerName'] in self.blueTeam or "Minion_T100" in event['KillerName']:
                                 data[1] = 1
-                            elif event['KillerName'] in self.redTeam:
+                            elif event['KillerName'] in self.redTeam or "Minion_T200" in event['KillerName']:
                                 data[1] = 2
                         elif event['EventName'] == "TurretKilled":
-                            if event['KillerName'] in self.blueTeam:
+                            if event['KillerName'] in self.blueTeam or "Minion_T100" in event['KillerName']:
                                 data[6] += 1
-                            elif event['KillerName'] in self.redTeam:
+                            elif event['KillerName'] in self.redTeam or "Minion_T200" in event['KillerName']:
                                 data[10] += 1
                         elif event['EventName'] == "InhibKilled":
-                            if event['KillerName'] in self.blueTeam:
+                            if event['KillerName'] in self.blueTeam or "Minion_T100" in event['KillerName']:
                                 if not firstInhib:
                                     data[2] = 1
                                 data[7] += 1
-                            elif event['KillerName'] in self.redTeam:
+                            elif event['KillerName'] in self.redTeam or "Minion_T200" in event['KillerName']:
                                 if not firstInhib:
                                     data[2] = 2
                                 data[11] += 1
@@ -257,8 +328,24 @@ class Application:
                 x = self.model.predict([data])
                 print(data)
                 print(x)
-                self.blueConfidence.configure(text="Blue Confidence: \n" + str(round(x[0][1]*100)))
-                self.redConfidence.configure(text="Red Confidence: \n" + str(round(x[0][0]*100)))
+
+                self.blueKills.configure(text="Kills: " + str(blueKills))
+                self.redKills.configure(text="Kills: " + str(redKills))
+                self.blueTowers.configure(text="Towers: " + str(data[6]))
+                self.redTowers.configure(text="Towers: " + str(data[10]))
+                self.blueInhibs.configure(text="Inhibs: " + str(data[7]))
+                self.redInhibs.configure(text="Inhibs: " + str(data[11]))
+                self.blueDragons.configure(text="Dragons: " + str(data[9]))
+                self.redDragons.configure(text="Dragons: " + str(data[13]))
+                self.blueBarons.configure(text="Barons: " + str(data[8]))
+                self.redBarons.configure(text="Barons: " + str(data[12]))
+                self.blueItems.configure(text="Item Gold: \n" + str(blueSpentGold))
+                self.redItems.configure(text="Item Gold: \n" + str(redSpentGold))
+
+
+
+                self.blueConfidence.configure(text="Blue Confidence: \n" + str(round(x[0][1]*100))+"%")
+                self.redConfidence.configure(text="Red Confidence: \n" + str(round(x[0][0]*100))+"%")
 
                 if x[0][0] > x[0][1]:
                     print("Red Advantage")
