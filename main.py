@@ -1,16 +1,22 @@
-from tkinter.constants import ACTIVE, DISABLED, END, GROOVE, LEFT, NSEW, RIGHT
+from tkinter.constants import ACTIVE, DISABLED, END, GROOVE, LEFT, NSEW, RIGHT, TOP
 from riotwatcher import LolWatcher, ApiError
 from PIL import Image, ImageTk
 from tensorflow import keras
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backend_bases import key_press_handler
+from matplotlib.figure import Figure
 import tkinter as tk
 import time
 import requests
 import threading
+import queue
+import numpy as np
 
 
 
-class Application:
+class LeagueAI:
     #initialize
+    LIGHT_BLUE = '#80b3ff'
     def __init__(self, master):
         self.master = master
         self.master.protocol("WM_DELETE_WINDOW", self.onClose)
@@ -19,45 +25,89 @@ class Application:
         master.resizable(False, False)
         master.configure(background='#80b3ff')
         master.title("League Predictor")
+        self.thread_queue = queue.Queue()
         self.blueTeam = []
         self.redTeam = []
         self.blueTeamChamps = []
         self.redTeamChamps = []
+        self.goldDiff = []
+        self.prediction = []
+        self.gametime = []
         self.killAllThreads = False
         self.model = keras.models.load_model('models/model1')
         self.setup()
+        self.listen_for_result()
     
     def setup(self):
         self.label = tk.Label(self.master, text="League of Legends Game Predictor", font=("Ariel", 24))
         self.label.configure(background='#80b3ff')
         self.label.pack()
 
-        self.apiEntry = tk.Entry(self.master)
-        self.apiEntry.place(x=300,y=50,width=300,height=20)
+        self.connectionStatus = tk.Label(self.master, text="Connection Status:", font=("Ariel", 20))
+        self.connectionStatus.configure(background='#80b3ff')
+        self.connectionStatus.pack(side=TOP, pady=50)
 
-        self.apiStart = tk.Button(self.master, text="Enter API Key", command=self.startThread)
-        self.apiStart.place(x=200,y=50,width=80,height=20)
+        self.apiStart = tk.Button(self.master, text="Connect To Game", command=self.startThread)
+        self.apiStart.place(x=325,y=50,width=150,height=40)
 
         self.close_button = tk.Button(self.master, text="Close", command=self.onClose)
         self.close_button.place(x=350,y=550,width=100,height=40)
 
-        #self.threadsButton = tk.Button(self.master, text="Threads", command=self.checkThreads)
-        #self.threadsButton.place(x=150,y=550,width=100,height=40)
+        self.threadsButton = tk.Button(self.master, text="Threads", command=self.createGraph)
+        self.threadsButton.place(x=150,y=550,width=100,height=40)
 
-
+    #test
+    def listen_for_result(self):
+        """ Check if there is something in the queue. """
+        try:
+            self.res = self.thread_queue.get(0)
+            self._print(self.res)
+        except queue.Empty:
+            self.master.after(100, self.listen_for_result)
 
     def checkThreads(self):
         for thread in threading.enumerate(): 
             print(thread.name)
+        print(self.gametime)
+        print(self.goldDiff)
+        print(len(self.gametime))
+        print(len(self.goldDiff))
+
     
     def startThread(self):
+        try:
+            self.canvas.get_tk_widget().destroy()
+            self.canvas2.get_tk_widget().destroy()
+        except:
+            pass
+        self.goldDiff.clear()
+        self.gametime.clear()
+        self.prediction.clear()
+        self.apiStart.configure(state=DISABLED)
         self.secondThread = threading.Thread(target=self.getAPIKey)
+        self.secondThread.daemon = True
         self.secondThread.start()
+
+    def onClose(self):
+        print("closed")
+        self.master.destroy()
+    
+    def displayConnectionStatus(self, y):
+        displayText = ""
+        if "api_key or kernel_url" in y:
+            displayText = "Connection Status:\nEnter API Key"
+        elif "403 Client Error" in y:
+            displayText = "Connection Status:\nInvalid API Key"
+        elif "HTTPSConnectionPool(host=" in y:
+            displayText = "Connection Status:\nWaiting for Game"
+        self.connectionStatus.configure(text=displayText)
+        return y
 
     #create the names of players and their champion icons
     def createNamesAndIcons(self):
         self.entries=[]
         self.champImgs=[]
+        self.connectionStatus.config(text="")
 
         #create winningTeam and percentages tab
         self.winningTeam = tk.Label(self.master, text="Winning Team: ", font=("Ariel", 18))
@@ -151,6 +201,33 @@ class Application:
             self.entries.append(temp)
             self.champImgs.append(temp2)
     
+    
+    def createGraph(self):
+        # t = np.arange(0, 3, .01)
+        # sin = np.sin(2 * np.pi * t)
+        figure = Figure(figsize=(5, 4), dpi=100)
+        figure.patch.set_facecolor('#80b3ff')
+        subplot = figure.add_subplot(1,1,1)
+        subplot.set_title("Item Value Difference")
+        subplot.grid(True)
+        subplot.plot(self.gametime, self.goldDiff)
+
+        figure1 = Figure(figsize=(5, 4), dpi=100)
+        figure1.patch.set_facecolor('#80b3ff')
+        subplot1 = figure1.add_subplot(1,1,1)
+        subplot1.set_title("Prediction (1 = Blue, 0 = Red)")
+        subplot1.grid(True)
+        subplot1.plot(self.gametime, self.prediction)
+
+        self.canvas = FigureCanvasTkAgg(figure, master=root)  # A tk.DrawingArea.
+        self.canvas.draw()
+        self.canvas.get_tk_widget().place(x=50,y=100,width=700,height=200)
+        
+        self.canvas2 = FigureCanvasTkAgg(figure1, master=root)  # A tk.DrawingArea.
+        self.canvas2.draw()
+        self.canvas2.get_tk_widget().place(x=50,y=300,width=700,height=200)
+        
+    
     #works
     def resetWindow(self):
         for i in range(len(self.blueTeam)):
@@ -180,24 +257,14 @@ class Application:
         self.redItems.destroy()
         self.apiStart.configure(state=ACTIVE)
 
+        self.connectionStatus.configure(text="Connection Status:")
+        self.createGraph()
         print('resetting')
-
-    
-    def onClose(self):
-        print("closed")
-        self.killAllThreads = True
-        self.master.destroy()
-
-    def killThreads(self):
-        if self.killAllThreads:
-            print("Threads Killed")
-            self.master.destroy()
 
 
     def getAPIKey(self):
-        x1 = self.apiEntry.get()
         try:
-            lol_watcher = LolWatcher(x1)
+            lol_watcher = LolWatcher('')
             my_region = 'na1'
             versions = lol_watcher.data_dragon.versions_for_region(my_region)
             champions_version = versions['n']['champion']
@@ -205,32 +272,40 @@ class Application:
             self.champions = lol_watcher.data_dragon.champions(champions_version)['data']
             self.items = lol_watcher.data_dragon.items(items_version)['data']
             self.me = lol_watcher.summoner.by_name(my_region, 'tomtom2352')
-            self.apiStart.configure(state=DISABLED)
             self.waitForActiveGame()
         except Exception as e:
             print(e)
+            self.apiStart.configure(state=ACTIVE)
+            print("in getAPIKey")
+            self.displayConnectionStatus(str(e))
 
     def waitForActiveGame(self):
         while True:
-            self.killThreads()
             try:
                 response = requests.get('https://127.0.0.1:2999/liveclientdata/allgamedata', verify=False).json()
                 print('used')
                 for player in response['allPlayers']:
+                    champion = player['rawChampionName'].replace('game_character_displayname_','')
+                    if champion == "FiddleSticks":
+                        champion = "Fiddlesticks"
                     if player['team'] == 'ORDER':
                         self.blueTeam.append(player['summonerName'])
-                        self.blueTeamChamps.append(player['rawChampionName'].replace('game_character_displayname_',''))
+                        self.blueTeamChamps.append(champion)
                     else:
                         self.redTeam.append(player['summonerName'])
-                        self.redTeamChamps.append(player['rawChampionName'].replace('game_character_displayname_',''))
+                        self.redTeamChamps.append(champion)
 
                 print(self.blueTeam)
+                print(self.blueTeamChamps)
                 print(self.redTeam)
+                print(self.redTeamChamps)
                 self.createNamesAndIcons()
                 self.analyzeGame()
                 break
             except Exception as e:
                 print(e)
+                print("in waitforActiveGame")
+                self.displayConnectionStatus(str(e))
     
     
     def getTotalItemValue(self, player):
@@ -240,7 +315,7 @@ class Application:
             totalGold += self.items[itemID]['gold']['total']
         return totalGold
     
-
+    #calculates in game stats
     def analyzeGame(self):
         listSize = 0
         data = [0]*16
@@ -252,8 +327,8 @@ class Application:
         redKills = 0
         
         
+        
         while True:
-            self.killThreads()
             try:
                 time.sleep(1)
                 response = requests.get('https://127.0.0.1:2999/liveclientdata/allgamedata', verify=False).json()
@@ -329,6 +404,7 @@ class Application:
                 print(data)
                 print(x)
 
+                #Show the stats
                 self.blueKills.configure(text="Kills: " + str(blueKills))
                 self.redKills.configure(text="Kills: " + str(redKills))
                 self.blueTowers.configure(text="Towers: " + str(data[6]))
@@ -342,17 +418,20 @@ class Application:
                 self.blueItems.configure(text="Item Gold: \n" + str(blueSpentGold))
                 self.redItems.configure(text="Item Gold: \n" + str(redSpentGold))
 
-
-
                 self.blueConfidence.configure(text="Blue Confidence: \n" + str(round(x[0][1]*100))+"%")
                 self.redConfidence.configure(text="Red Confidence: \n" + str(round(x[0][0]*100))+"%")
 
+                self.gametime.append(response['gameData']['gameTime']/60)
+                self.goldDiff.append(blueSpentGold-redSpentGold)
+                self.prediction.append(x[0][1])
                 if x[0][0] > x[0][1]:
                     print("Red Advantage")
                     self.winningTeam.configure(text="Winning Team: Red")
                 else:
                     print("Blue Advantage")
                     self.winningTeam.configure(text="Winning Team: Blue")
+                    
+
 
             except Exception as e:
                 print(e)
@@ -360,5 +439,5 @@ class Application:
                 break
 
 root = tk.Tk()
-my_gui = Application(root)
+gui = LeagueAI(root)
 root.mainloop()

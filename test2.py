@@ -9,12 +9,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from tensorflow import keras
-
-
+y = [23.45/60,12.5/60]
+print(y)
 model = tf.keras.models.load_model('models/model1')
 
 x = model.predict([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6]])
-print(x)
+
+def test():
+    return printFunction
+
+def printFunction():
+    print("hello")
+    print("this is a function called inside a function")
+
 
 def calculatePi(n):
     pointCirc = 0
@@ -27,5 +34,5 @@ def calculatePi(n):
         
     return 4*pointCirc/n
 
-print(calculatePi(10000))
+y = test()
 
