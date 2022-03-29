@@ -1,11 +1,16 @@
 from riotwatcher import LolWatcher, ApiError
-
+from random import randint, seed
 import numpy as np
 import matplotlib as plt
 import pandas as pd
+import certifi
 
-lol_watcher = LolWatcher('')
+
+seed(1)
+
+lol_watcher = LolWatcher('RGAPI-840107f5-71d7-4970-9a08-9e88614bf00f')
 my_region = 'na1'
+puuid_region = "AMERICAS"
 
 #declare versions
 versions = lol_watcher.data_dragon.versions_for_region(my_region)
@@ -22,10 +27,10 @@ def generateMatchIds(name, num):
         print(num)
         ids = []
         me = lol_watcher.summoner.by_name(my_region, name)
-        my_matches = lol_watcher.match.matchlist_by_account(my_region, me['accountId'])['matches']
+        my_matches = lol_watcher.match.matchlist_by_puuid(puuid_region, me['puuid'])
         for i in my_matches:
-            ids.append(i['gameId'])
-        return ids + generateMatchIds(lol_watcher.match.by_id(my_region, ids[0])['participantIdentities'][0]['player']['summonerName'], num-1)
+            ids.append(i)
+        return ids + generateMatchIds(lol_watcher.match.by_id(puuid_region, ids[randint(0,9)])["info"]['participants'][0]['summonerName'], num-1)
 
 #gather data
 def generateGames(summonerName, gamesX100):
@@ -51,33 +56,33 @@ def generateGames(summonerName, gamesX100):
     print(len(matchIDs))
     
     for gameID in matchIDs:
-        matchDetail = lol_watcher.match.by_id(my_region, gameID)
-        gameOutcome.append(1 if matchDetail['teams'][0]['win'] == "Win" else 0)
-        firstBlood.append(1 if matchDetail['teams'][0]['firstBlood'] else 2)
-        firstTower.append(1 if matchDetail['teams'][0]['firstTower'] else 2)
-        firstInhib.append(1 if matchDetail['teams'][0]['firstInhibitor'] else 2)
-        firstBaron.append(1 if matchDetail['teams'][0]['firstBaron'] else 2)
-        firstDrake.append(1 if matchDetail['teams'][0]['firstDragon'] else 2)
-        firstRift.append(1 if matchDetail['teams'][0]['firstRiftHerald'] else 2)
-        blueTowersKills.append(matchDetail['teams'][0]['towerKills'])
-        blueInhibsKills.append(matchDetail['teams'][0]['inhibitorKills'])
-        blueBaronKills.append(matchDetail['teams'][0]['baronKills'])
-        blueDrakeKills.append(matchDetail['teams'][0]['dragonKills'])
-        redTowersKills.append(matchDetail['teams'][1]['towerKills'])
-        redInhibsKills.append(matchDetail['teams'][1]['inhibitorKills'])
-        redBaronKills.append(matchDetail['teams'][1]['baronKills'])
-        redDrakeKills.append(matchDetail['teams'][1]['dragonKills'])
+        matchDetail = lol_watcher.match.by_id(puuid_region, gameID)
+        gameOutcome.append(1 if matchDetail["info"]['teams'][0]['win'] else 0)
+        firstBlood.append(1 if matchDetail["info"]['teams'][0]['objectives']['champion']['first'] else 2)
+        firstTower.append(1 if matchDetail["info"]['teams'][0]['objectives']['tower']['first'] else 2)
+        firstInhib.append(1 if matchDetail["info"]['teams'][0]['objectives']['inhibitor']['first'] else 2)
+        firstBaron.append(1 if matchDetail["info"]['teams'][0]['objectives']['baron']['first'] else 2)
+        firstDrake.append(1 if matchDetail["info"]['teams'][0]['objectives']['dragon']['first'] else 2)
+        firstRift.append(1 if matchDetail["info"]['teams'][0]['objectives']['riftHerald']['first'] else 2)
+        blueTowersKills.append(matchDetail["info"]['teams'][0]['objectives']['tower']['kills'])
+        blueInhibsKills.append(matchDetail["info"]['teams'][0]['objectives']['inhibitor']['kills'])
+        blueBaronKills.append(matchDetail["info"]['teams'][0]['objectives']['baron']['kills'])
+        blueDrakeKills.append(matchDetail["info"]['teams'][0]['objectives']['dragon']['kills'])
+        redTowersKills.append(matchDetail["info"]['teams'][1]['objectives']['tower']['kills'])
+        redInhibsKills.append(matchDetail["info"]['teams'][1]['objectives']['inhibitor']['kills'])
+        redBaronKills.append(matchDetail["info"]['teams'][1]['objectives']['baron']['kills'])
+        redDrakeKills.append(matchDetail["info"]['teams'][1]['objectives']['dragon']['kills'])
         blueGold = 0
         redGold = 0
         blueKills = 0
         redKills = 0
-        for player in matchDetail['participants']:
+        for player in matchDetail["info"]['participants']:
             if player['teamId'] == 100:
-                blueGold += player['stats']['goldEarned']
-                blueKills += player['stats']['kills']
+                blueGold += player['goldEarned']
+                blueKills += player['kills']
             else:
-                redGold += player['stats']['goldEarned']
-                redKills += player['stats']['kills']
+                redGold += player['goldEarned']
+                redKills += player['kills']
 
         goldDifference.append(blueGold-redGold)
         killDifference.append(blueKills-redKills)
@@ -105,9 +110,11 @@ def generateGames(summonerName, gamesX100):
     }
     return gameData
 
-learnData = generateGames('tomtom2352', 1)
+
+learnData = generateGames('Sn1per1', 50)
 gameDataPandas = pd.DataFrame(data=learnData)
 gameDataPandas.set_index('win', inplace=True)
 
 with pd.ExcelWriter('dataFolder/learnData.xlsx', mode='a') as writer:  
-    gameDataPandas.to_excel(writer, sheet_name='Sheet5')
+    gameDataPandas.to_excel(writer, sheet_name='Sheet')
+

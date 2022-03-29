@@ -10,7 +10,7 @@ import seaborn as sns
 from tensorflow import keras
 
 
-lol_watcher = LolWatcher('')
+lol_watcher = LolWatcher('RGAPI-5ed0ba93-15b2-4b6b-8bef-45b5450cc3f2')
 my_region = 'na1'
 
 #declare versions
@@ -27,7 +27,6 @@ testResult = testData.pop('win')
 
 
 sns.pairplot(learnData[['goldDiff', 'killDif', 'blueTowerKills', 'redTowerKills']], diag_kind='kde')
-
 model = tf.keras.Sequential([
     keras.layers.Dense(16),
     keras.layers.Dense(128, activation='relu'),
@@ -39,9 +38,8 @@ model = tf.keras.Sequential([
 model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 model.fit(learnData, learnResult, epochs=20)
 test = model.evaluate(testData,  testResult, verbose=1) 
-model.save('models/model1')
+model.save('models/modelHDF5.h5')
 
 print(model.summary())
 print('Test accuracy:', test)
 x = model.predict(testData)
-print(x[0:10])

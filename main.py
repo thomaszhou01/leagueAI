@@ -34,7 +34,7 @@ class LeagueAI:
         self.prediction = []
         self.gametime = []
         self.killAllThreads = False
-        self.model = keras.models.load_model('models/model1')
+        self.model = keras.models.load_model('models/modelHDF5.h5')
         self.setup()
         self.listen_for_result()
     
